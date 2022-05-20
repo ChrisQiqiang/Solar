@@ -112,14 +112,7 @@ class Task(object):
                 t = task_instance.finished_timestamp
         return t
 
-    ##chris
-    def __cmp__(self, other):
-        if self.priority < other.priority or (self.priority == other.priority and self.arrived_timestamp < other.arrived_timestamp):
-            return 1
-        elif self.priority == other.priority and self.arrived_timestamp == other.arrived_timestamp:
-            return 0
-        else:
-            return -1
+
 
 
 class Job(object):
@@ -129,9 +122,10 @@ class Job(object):
         self.env = env
         self.job_config = job_config
         self.id = job_config.id
-
+        self.priority = None
         self.tasks_map = {}
         for task_config in job_config.task_configs:
+            self.priority = task_config.priority
             task_index = task_config.task_index
             self.tasks_map[task_index] = Job.task_cls(env, self, task_config)
 
@@ -235,7 +229,7 @@ class TaskInstance(object):
         self.machine = None
         self.process = None
         self.new = True
-
+        self.priority = task.priority
         self.started = False
         self.finished = False
         self.started_timestamp = None
@@ -264,10 +258,3 @@ class TaskInstance(object):
         self.machine.run_task_instance(self)
         self.process = self.env.process(self.do_work())
 
-    def __cmp__(self, other):
-        if self.task.priority < other.task.priority:
-            return 1
-        elif self.task.priority == other.task.priority:
-            return 0
-        else:
-            return -1

@@ -100,9 +100,8 @@ class Cluster(object):
     def split_on_priority(self, job_arr):
         res = [0 for i in range(5)]
         for job in job_arr:
-            task = job.tasks[0]
             for i in range(5):
-                if i + 1 == task.priority:
+                if i + 1 == job.priority:
                     res[i] += 1
         return res
 
@@ -111,11 +110,13 @@ class Cluster(object):
         job_num = self.split_on_priority(self.jobs)
         unfinished_job_num = self.split_on_priority(self.unfinished_jobs)
         finished_job_num = self.split_on_priority(self.finished_jobs)
+        running_job_num = self.split_on_priority(self.running_task_instances)
+        scheduled_job_num = [finished_job_num[i] + running_job_num[i] for i in range(5)]
+        queue_job_num = [unfinished_job_num[i] - running_job_num[i] for i in range(5)]
         return {
             'arrived_jobs': job_num,
-            'unfinished_jobs': unfinished_job_num,
-            'finished_jobs': finished_job_num,
-            ''
-            # 'running_task_instances': len(self.running_task_instances),
-            'machine_states': [machine.state for machine in self.machines]
+            'scheduled_jobs': scheduled_job_num,
+            'queue_jobs': queue_job_num,
+            'finished_jobs': finished_job_num
+            # 'machine_states': [machine.state for machine in self.machines]
         }

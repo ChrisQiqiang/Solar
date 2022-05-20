@@ -96,5 +96,9 @@ class Machine(object):
             'finished_task_instances': len(self.finished_task_instances)
         }
 
+    @property
+    def scheduled_tasks(self):
+        return len(self.running_task_instances) + len(self.finished_task_instances)
+
     def __eq__(self, other):
         return isinstance(other, Machine) and other.id == self.id

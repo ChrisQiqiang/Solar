@@ -1,12 +1,20 @@
 from core.alogrithm import Algorithm
 from queue import Queue, PriorityQueue
-
+import functools
 
 ###需要修改machine
 class priority_based(Algorithm):
-    def __init__(self, path):
+
+    def cmp(self, l, r):
+        if l.priority < r.priority or (l.priority == r.priority and l.arrived_timestamp > r.arrived_timestamp):
+            return 1
+        elif l.priority == r.priority and l.arrived_timestamp == r.arrived_timestamp:
+            return 0
+        else:
+            return -1
+
+    def __init__(self):
         super(Algorithm, self).__init__()
-        self.path = path
         self.scheduled_tasks = []
         self.clock = 0
 
@@ -16,18 +24,7 @@ class priority_based(Algorithm):
         self.clock = clock
 
         ##对于待调度的task按照priority排序，排序规则为：优先级高的在前面，优先级相同arrived的时间早的在前面。
-        tasks = sorted(tasks, key=lambda t: -t.priority)
-        if clock % 100 == 0:
-            with open(self.path, 'w+') as fw:
-                echo = "时间：第{}天{}时{}分{}秒, 排队任务数： {} , 已调度任务数： {}, 已运行结束任务数： {}".format(int(self.clock / (24 * 3600)),
-                                                                    int((self.clock % (24 * 3600)) / 3600),
-                                                                    int((self.clock % 3600) / 60),
-                                                                    int(self.clock % 60),
-                                                                    len(tasks),
-                                                                    len(self.scheduled_tasks),
-                                                                    len(cluster.finished_jobs))
-                print(echo)
-                fw.write(echo)
+        tasks = sorted(tasks, key=functools.cmp_to_key(self.cmp))
         candidate_task = None
         candidate_machine = None
         for machine in machines:
@@ -43,8 +40,8 @@ class priority_based(Algorithm):
                 break
         return None if candidate_machine is None or candidate_task is None else (candidate_machine, candidate_task)
 
-    def schedule_log(self):
-        with open(self.path, 'w+') as fw:
-            for task in self.scheduled_tasks:
-                fw.write(str(task.job.id) + " " + str(task.arrived_timestamp) + " "
-                         + str(task.started_timestamp) + " " + str(task.finished_timestamp) + "\n")
+    # def schedule_log(self):
+    #     with open(self.path, 'w+') as fw:
+    #         for task in self.scheduled_tasks:
+    #             fw.write(str(task.job.id) + " " + str(task.arrived_timestamp) + " "
+    #                      + str(task.started_timestamp) + " " + str(task.finished_timestamp) + "\n")

@@ -33,42 +33,33 @@ from queue import Queue, PriorityQueue
 # 364.34480657934813 1 1518
 
 class multi_queue(Algorithm):
-    def __init__(self, path):
+    def __init__(self,  rationing = [1, 2, 3, 4, 5]):
         super(Algorithm, self).__init__()
         self.multi_queue_tasks = [[] for i in range(5)]
         ###表示每个优先级相等时间能够schedule的任务数
-        self.counter_limit = [1, 2, 3, 4, 5]
+        self.counter_limit = rationing
         self.machines = None
         self.unscheduled_tasks = []
         self.unscheduled_task_map = {}
         self.scheduled_tasks = []
         self.clock = 0
-        self.path = path
 
-    def choose_tasks_to_schedule(self):
+    def choose_tasks_to_schedule(self, cluster):
         strategy = None
-        ##按照比例collect有待执行的task
-        for i in range(5):
-            # 从优先级为5的往下遍历
-            priority = 5 - i
-            pos = priority - 1
-            split = min(self.counter_limit[pos], len(self.multi_queue_tasks[pos]))
-            for x in range(split):
-                tmp_task = self.multi_queue_tasks[pos][x]
-                if self.unscheduled_task_map.get(tmp_task.id) is None:
-                    self.unscheduled_tasks.append(tmp_task)
-                    self.unscheduled_task_map[tmp_task.id] = 1
-        if self.clock % 60 == 0:
-            print("时间：第{}天{}时{}分{}秒, 排队任务数： {} {} {} {} {}, 已调度任务数： {}".format(int(self.clock / (24 * 3600)),
-                                                                    int((self.clock % (24 * 3600)) / 3600),
-                                                                    int((self.clock % 3600) / 60),
-                                                                    int(self.clock % 60),
-                                                                    len(self.multi_queue_tasks[0]),
-                                                                    len(self.multi_queue_tasks[1]),
-                                                                    len(self.multi_queue_tasks[2]),
-                                                                    len(self.multi_queue_tasks[3]),
-                                                                    len(self.multi_queue_tasks[4]),
-                                                                    len(self.scheduled_tasks)))
+        ##按照比例collect有待执行的task,只有当这个待运行的队列空了之后才能再进入该队列，防止任务多的优先队列不停进队导致比例失衡。
+        if len(self.unscheduled_tasks) == 0:
+            for i in range(5):
+                # 从优先级为5的往下遍历
+                priority = 5 - i
+                pos = priority - 1
+                split = min(self.counter_limit[pos], len(self.multi_queue_tasks[pos]))
+                for x in range(split):
+                    tmp_task = self.multi_queue_tasks[pos][x]
+                    if self.unscheduled_task_map.get(tmp_task.id) is None:
+                        self.unscheduled_tasks.append(tmp_task)
+                        self.unscheduled_task_map[tmp_task.id] = 1
+            self.unscheduled_tasks = sorted(self.unscheduled_tasks, key=lambda t: t.arrived_timestamp)
+
         if len(self.unscheduled_tasks) > 0:
             candidate_task = self.unscheduled_tasks[0]
             for machine in self.machines:
@@ -93,12 +84,12 @@ class multi_queue(Algorithm):
             p = task.priority
             self.multi_queue_tasks[p - 1].append(task)
 
-        schedule_strategy = self.choose_tasks_to_schedule()
+        schedule_strategy = self.choose_tasks_to_schedule(cluster)
         return schedule_strategy
 
-    def schedule_log(self,):
-        with open(self.path, 'w+') as fw:
-            for task in self.scheduled_tasks:
-                fw.write(str(task.job.id) + " " + str(task.arrived_timestamp) + " "
-                         + str(task.started_timestamp) + " " + str(task.finished_timestamp) + "\n")
+    # def schedule_log(self,):
+    #     with open(self.path, 'w+') as fw:
+    #         for task in self.scheduled_tasks:
+    #             fw.write(str(task.job.id) + " " + str(task.arrived_timestamp) + " "
+    #                      + str(task.started_timestamp) + " " + str(task.finished_timestamp) + "\n")
 

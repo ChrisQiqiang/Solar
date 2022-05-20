@@ -1,3 +1,6 @@
+import logging
+
+from playground.Non_DAG.utils.tools import convert_timestamp
 class Scheduler(object):
     def __init__(self, env, algorithm):
         self.env = env
@@ -25,12 +28,11 @@ class Scheduler(object):
                 # print("Current time: " + str(self.env.now) + ", task duration: " + str(task.task_config.duration))
                 # print("predictable finish time: " + str(self.env.now + task.task_config.duration))
                 task.start_task_instance(machine)
-                # print(machine.state)
-                # print("")
 
     def run(self):
         while not self.simulation.finished:
+            if self.env.now % 3600 == 0:
+                logging.info(str(convert_timestamp(self.env.now)) + str(self.cluster.state))
             self.make_decision()
             yield self.env.timeout(60)
         self.destroyed = True
-

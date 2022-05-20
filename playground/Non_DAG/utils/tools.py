@@ -1,3 +1,4 @@
+import logging
 import time
 import numpy as np
 import tensorflow as tf
@@ -14,6 +15,11 @@ def average_completion(exp):
     return completion_time / number_task
 
 
+def convert_timestamp(time):
+    return "第{}天{}时{}分{}秒".format(int(time / (24 * 3600)),
+                                        int((time % (24 * 3600)) / 3600),
+                                        int((time % 3600) / 60),
+                                        int(time % 60))
 
 ##chris
 
@@ -36,8 +42,7 @@ def average_feedback(exp):
     import seaborn as sns
     sns.set_palette("hls")  # 设置所有图的颜色，使用hls色彩空间
     for i, x in enumerate(wait):
-        print("优先级为： {}, 任务数为： {}".format(i + 1, len(x)))
-        print(sum(x) / len(x), min(x), max(x))
+        logging.info("优先级为： {}, 任务数为： {}, 任务等待延迟均值：{}， 任务等待标准差：{}, 任务等待最大值{}".format(i + 1, len(x), np.mean(x), np.std(x), np.max(x)))
         # sns.distplot(x, bins=30)
     # plt.show()
 
