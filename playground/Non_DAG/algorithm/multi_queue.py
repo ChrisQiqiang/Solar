@@ -4,9 +4,8 @@ from queue import Queue, PriorityQueue
 
 ###需要修改machine
 #TODO:
-# 1. 改变counter_limit，是否对训练结果有影响，不同的比例会带来的结果值分别为多少~
-# 2. 如何不在出队列这一动作上做比例控制，这个比例控制和schedule的周期太相关，且因为和task实体强绑定，不够灵活。
-# 3，可以根据job_name获取该任务的历史运行记录，预测task本次的duration，所需cpu，mem，从而决定schedule机器达到load balance
+# 1. 如何不在出队列这一动作上做比例控制，这个比例控制和schedule的周期太相关，且因为和task实体强绑定，不够灵活。
+# 2，可以根据job_name获取该任务的历史运行记录，预测task本次的duration，所需cpu，mem，从而决定schedule机器达到load balance
 #
 # priority-based:
 # 任务平均等待时间 : 560.80135 秒 最大值为：318 分 39 秒
